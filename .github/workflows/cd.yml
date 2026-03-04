@@ -23,44 +23,21 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Extract version from tag
+      - name: Verify tag
         shell: bash
         run: |
           if [[ "${GITHUB_REF_TYPE}" != "tag" ]]; then
             echo "This workflow must be triggered by a tag." >&2
             exit 1
           fi
+          echo "Tag: ${GITHUB_REF_NAME}"
 
-          TAG_NAME="${GITHUB_REF_NAME}"
-          VERSION="${TAG_NAME#v}"
-
-          echo "Tag name: ${TAG_NAME}"
-          echo "Package version: ${VERSION}"
-
-          echo "PACKAGE_VERSION=${VERSION}" >> "$GITHUB_ENV"
-
-      - name: Update pyproject.toml version
+      - name: Get package version
+        id: version
         run: |
-          python - << 'PY'
-          import os
-          import pathlib
-          import re
-
-          version = os.environ["PACKAGE_VERSION"]
-          path = pathlib.Path("pyproject.toml")
-          text = path.read_text(encoding="utf-8")
-
-          new_text, count = re.subn(
-              r'(?m)^(version\\s*=\\s*")[^"]*(")',
-              rf'\\1{version}\\2',
-              text,
-          )
-
-          if count == 0:
-              raise SystemExit("version field not found in pyproject.toml")
-
-          path.write_text(new_text, encoding="utf-8")
-          PY
+          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Package version: ${VERSION}"
 
       - name: Install build tooling
         run: |
@@ -79,9 +56,9 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
-            **ghscope** ${{ env.PACKAGE_VERSION }}
+            **ghscope** ${{ steps.version.outputs.version }}
             - Install: `pip install ghscope`
-            - [PyPI](https://pypi.org/project/ghscope/${{ env.PACKAGE_VERSION }}/)
+            - [PyPI](https://pypi.org/project/ghscope/${{ steps.version.outputs.version }}/)
           files: |
             dist/*.whl
             dist/*.tar.gz
