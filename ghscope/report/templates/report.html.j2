@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>GitHub Activity Report</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #020617;
+        --bg-elevated: #0b1220;
+        --bg-subtle: #020617;
+        --border-subtle: #1f2937;
+        --accent: #38bdf8;
+        --accent-soft: rgba(56, 189, 248, 0.1);
+        --accent-strong: #0ea5e9;
+        --text: #e5e7eb;
+        --muted: #9ca3af;
+        --danger: #f97373;
+        --success: #22c55e;
+        --warning: #facc15;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top left, #0f172a, #020617 45%, #000 100%);
+        color: var(--text);
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .layout {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        width: 260px;
+        background: rgba(15, 23, 42, 0.98);
+        border-right: 1px solid var(--border-subtle);
+        padding: 1.75rem 1.5rem;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        overflow-y: auto;
+      }
+
+      .sidebar h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.3rem;
+        letter-spacing: 0.02em;
+      }
+
+      .sidebar .org {
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin-bottom: 1.5rem;
+      }
+
+      .sidebar .meta {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 1.5rem;
+      }
+
+      .sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.9rem;
+      }
+
+      .sidebar-nav a {
+        padding: 0.4rem 0.6rem;
+        border-radius: 0.4rem;
+        color: var(--muted);
+        display: block;
+      }
+
+      .sidebar-nav a:hover {
+        background: var(--accent-soft);
+        color: var(--accent-strong);
+      }
+
+      .sidebar-footer {
+        margin-top: 2rem;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      main {
+        flex: 1;
+        max-width: 1200px;
+        padding: 1.75rem 2.0rem 2.5rem;
+        margin: 0 auto 0 260px;
+      }
+
+      .page-title {
+        font-size: 1.6rem;
+        margin: 0 0 0.5rem;
+      }
+
+      .page-subtitle {
+        font-size: 0.95rem;
+        color: var(--muted);
+        margin-bottom: 1.5rem;
+      }
+
+      .filters {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.8rem;
+      }
+
+      .filter-group label {
+        color: var(--muted);
+      }
+
+      .filter-group select,
+      .filter-group input[type="search"] {
+        background: rgba(15, 23, 42, 0.96);
+        border-radius: 0.45rem;
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        color: var(--text);
+        padding: 0.35rem 0.6rem;
+        font-size: 0.8rem;
+        min-width: 160px;
+        outline: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease,
+          background-color 0.15s ease;
+      }
+
+      .filter-group input[type="search"]::placeholder {
+        color: var(--muted);
+      }
+
+      .filter-group select:focus,
+      .filter-group input[type="search"]:focus {
+        border-color: var(--accent-strong);
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.6);
+        background-color: #020617;
+      }
+
+      .filter-group select::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .filter-group select::-webkit-scrollbar-track {
+        background: #020617;
+      }
+
+      .filter-group select::-webkit-scrollbar-thumb {
+        background: #1f2937;
+        border-radius: 999px;
+      }
+
+      .filter-group select::-webkit-scrollbar-thumb:hover {
+        background: #374151;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .card {
+        background: rgba(15, 23, 42, 0.96);
+        border-radius: 0.8rem;
+        border: 1px solid var(--border-subtle);
+        padding: 1rem 1.2rem;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.6);
+      }
+
+      .card h2 {
+        font-size: 1rem;
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+      }
+
+      .card h3 {
+        font-size: 0.95rem;
+        margin-top: 1.0rem;
+      }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+      }
+
+      .summary-item {
+        background: var(--bg-subtle);
+        border-radius: 0.7rem;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid var(--border-subtle);
+      }
+
+      .summary-label {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-bottom: 0.25rem;
+      }
+
+      .summary-value {
+        font-size: 1.0rem;
+        font-weight: 600;
+      }
+
+      .summary-subvalue {
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.7rem;
+        padding: 0.1rem 0.4rem;
+        border-radius: 999px;
+        border: 1px solid var(--border-subtle);
+        color: var(--muted);
+      }
+
+      .tag-success {
+        border-color: rgba(34, 197, 94, 0.5);
+        color: var(--success);
+      }
+
+      .tag-warning {
+        border-color: rgba(234, 179, 8, 0.5);
+        color: var(--warning);
+      }
+
+      .tag-muted {
+        color: var(--muted);
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+      }
+
+      .table th,
+      .table td {
+        border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+        padding: 0.35rem 0.5rem;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .table th {
+        font-weight: 500;
+        color: var(--muted);
+        background: rgba(15, 23, 42, 0.9);
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+
+      .table tr:nth-child(even) td {
+        background: rgba(15, 23, 42, 0.5);
+      }
+
+      .table-metric {
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.1rem 0.45rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid var(--border-subtle);
+        font-size: 0.7rem;
+        color: var(--muted);
+      }
+
+      .status-merged {
+        color: var(--success);
+      }
+
+      .status-open {
+        color: var(--accent-strong);
+      }
+
+      .status-closed {
+        color: var(--danger);
+      }
+
+      .timeline-bars {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        margin-top: 0.5rem;
+      }
+
+      .timeline-row {
+        display: grid;
+        grid-template-columns: 90px 1fr 40px;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.75rem;
+      }
+
+      .timeline-label {
+        color: var(--muted);
+      }
+
+      .timeline-bar-track {
+        position: relative;
+        height: 0.5rem;
+        border-radius: 999px;
+        background: #020617;
+        overflow: hidden;
+      }
+
+      .timeline-bar-commits,
+      .timeline-bar-prs,
+      .timeline-bar-issues {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+      }
+
+      .timeline-bar-commits {
+        background: rgba(56, 189, 248, 0.8);
+      }
+
+      .timeline-bar-prs {
+        background: rgba(34, 197, 94, 0.7);
+      }
+
+      .timeline-bar-issues {
+        background: rgba(234, 179, 8, 0.8);
+      }
+
+      .timeline-count {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        color: var(--muted);
+      }
+
+      .section {
+        margin-top: 1.5rem;
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 0.4rem;
+      }
+
+      .section-header h2 {
+        font-size: 1rem;
+        margin: 0;
+      }
+
+      .section-header span {
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+          "Courier New", monospace;
+      }
+
+      @media (max-width: 960px) {
+        .sidebar {
+          position: static;
+          width: 100%;
+          border-right: none;
+          border-bottom: 1px solid var(--border-subtle);
+        }
+
+        main {
+          padding: 1.25rem 1.25rem 2rem;
+          margin: 0;
+        }
+
+        .summary-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .summary-grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+
+        .sidebar-nav {
+          flex-wrap: wrap;
+          flex-direction: row;
+          gap: 0.35rem;
+        }
+
+        .sidebar-nav a {
+          padding-inline: 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <h1>ghscope report</h1>
+        <div class="org">
+          {{ report.org or "No organization" }}
+        </div>
+        <div class="meta">
+          Period<br />
+          <span class="mono">
+            {{ report.since.date().isoformat() }} &rarr; {{ report.until.date().isoformat() }}
+          </span>
+          <br /><br />
+          Generated<br />
+          <span class="mono">{{ report.generated_at.isoformat() }}</span>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="#overview">Overview</a>
+          <a href="#contributors">Contributors</a>
+          <a href="#repositories">Repositories</a>
+          <a href="#timeline">Timeline</a>
+          <a href="#pull-requests">Pull requests</a>
+          <a href="#commits">Commits</a>
+          <a href="#issues">Issues</a>
+        </nav>
+        <div class="sidebar-footer">
+          Using GitHub GraphQL (resource: <span class="mono">graphql</span>)<br />
+          This HTML is static &amp; portable.<br /><br />
+          <strong>Project links</strong><br />
+          <a href="https://github.com/Alievs-corp/ghscope">GitHub: Alievs-corp/ghscope</a><br />
+          <a href="https://pypi.org/project/ghscope/">PyPI: ghscope</a>
+        </div>
+      </aside>
+
+      <main data-total-members="{{ report.activity.users|length }}">
+        <header>
+          <h2 class="page-title">GitHub activity</h2>
+          <p class="page-subtitle">
+            Aggregated activity for
+            <span class="mono">{{ report.org or report.user }}</span>
+            over the selected window.
+          </p>
+        </header>
+
+        <section class="filters">
+          <div class="filter-group">
+            <label for="userFilter">Focus on contributor</label>
+            <select id="userFilter">
+              <option value="">All contributors</option>
+              {% for login in report.activity.users.keys()|list|sort %}
+                <option value="{{ login }}">@{{ login }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="textFilter">Filter by text</label>
+            <input
+              id="textFilter"
+              type="search"
+              placeholder="Search titles, messages, repos…"
+            />
+          </div>
+        </section>
+
+        {# ---------------- Overview ---------------- #}
+        <section id="overview" class="section card">
+          <div class="section-header">
+            <h2>Overview</h2>
+            <span>
+              {{ report.activity.repositories|length }} repositories ·
+              {{ report.activity.users|length }} org members
+            </span>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-item">
+              <div class="summary-label">Repositories</div>
+              <div class="summary-value">
+                <span id="summaryReposCount">
+                  {{ report.activity.repositories|length }}
+                </span>
+              </div>
+              <div class="summary-subvalue">
+                Active in window:
+                <span id="summaryReposActive">
+                  {{
+                    report.activity.repositories.values()
+                      | selectattr("commits", "gt", 0)
+                      | list
+                      | length
+                  }}
+                </span>
+              </div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">Commits</div>
+              <div class="summary-value">
+                <span id="summaryCommitsCount">
+                  {{
+                    report.activity.repositories.values()
+                      | map(attribute="commits")
+                      | sum
+                  }}
+                </span>
+              </div>
+              <div class="summary-subvalue">
+                lines:
+                <span id="summaryLinesAdded">
+                  {{
+                    report.activity.repositories.values()
+                      | map(attribute="lines_added")
+                      | sum
+                  }}
+                </span>++
+                /
+                <span id="summaryLinesDeleted">
+                  {{
+                    report.activity.repositories.values()
+                      | map(attribute="lines_deleted")
+                      | sum
+                  }}
+                </span>--
+              </div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">Pull requests</div>
+              <div class="summary-value">
+                <span id="summaryPrsOpened">
+                  {{
+                    report.activity.repositories.values()
+                      | map(attribute="pull_requests_opened")
+                      | sum
+                  }}
+                </span>
+              </div>
+              <div class="summary-subvalue">
+                merged:
+                <span id="summaryPrsMerged">
+                  {{
+                    report.activity.repositories.values()
+                      | map(attribute="pull_requests_merged")
+                      | sum
+                  }}
+                </span>
+              </div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">Issues</div>
+              <div class="summary-value">
+                <span id="summaryIssuesOpened">
+                  {{
+                    report.activity.repositories.values()
+                      | map(attribute="issues_opened")
+                      | sum
+                  }}
+                </span>
+              </div>
+              <div class="summary-subvalue">
+                closed:
+                <span id="summaryIssuesClosed">
+                  {{
+                    report.activity.repositories.values()
+                      | map(attribute="issues_closed")
+                      | sum
+                  }}
+                </span>
+              </div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">Contributors</div>
+              <div class="summary-value">
+                <span id="summaryContribActive">
+                  {{ report.activity.active_contributors|length }}
+                </span>
+              </div>
+              <div class="summary-subvalue">
+                inactive:
+                <span id="summaryContribInactive">
+                  {{ report.activity.inactive_contributors|length }}
+                </span>
+              </div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">Time span</div>
+              <div class="summary-value">
+                {{
+                  (report.until.date() - report.since.date()).days + 1
+                }}
+                days
+              </div>
+              <div class="summary-subvalue">
+                {{ report.since.date().isoformat() }} – {{ report.until.date().isoformat() }}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {# ---------------- Contributors ---------------- #}
+        <section id="contributors" class="section card">
+          <div class="section-header">
+            <h2>Contributors</h2>
+            <span>
+              Sorted by total activity (commits + PRs opened + issues opened + reviews given)
+            </span>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th class="table-metric">Commits</th>
+                <th class="table-metric">PRs</th>
+                <th class="table-metric">Issues</th>
+                <th class="table-metric">Reviews</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for login, summary in report.activity.users.items()
+                   | sort(attribute="1.commits", reverse=True) %}
+                <tr data-user-row data-user="{{ login }}">
+                  <td>
+                    <span class="mono">@{{ login }}</span>
+                    {% if login in report.activity.active_contributors %}
+                      <span class="tag tag-success">active</span>
+                    {% else %}
+                      <span class="tag tag-muted">inactive</span>
+                    {% endif %}
+                  </td>
+                  <td class="table-metric">
+                    {{ summary.commits }}
+                    <span class="summary-subvalue">
+                      ({{ summary.lines_added }}++ / {{ summary.lines_deleted }}--)
+                    </span>
+                  </td>
+                  <td class="table-metric">
+                    {{ summary.pull_requests_opened }}
+                    <span class="summary-subvalue">
+                      (merged {{ summary.pull_requests_merged }})
+                    </span>
+                  </td>
+                  <td class="table-metric">
+                    {{ summary.issues_opened }}
+                    <span class="summary-subvalue">
+                      (closed {{ summary.issues_closed }})
+                    </span>
+                  </td>
+                  <td class="table-metric">
+                    {{ summary.reviews_given }}
+                    <span class="summary-subvalue">
+                      (received {{ summary.reviews_received }})
+                    </span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </section>
+
+        {# ---------------- Repositories ---------------- #}
+        <section id="repositories" class="section card">
+          <div class="section-header">
+            <h2>Repositories</h2>
+            <span>{{ report.activity.repositories|length }} total</span>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Repository</th>
+                <th class="table-metric">Commits</th>
+                <th class="table-metric">Lines</th>
+                <th class="table-metric">PRs</th>
+                <th class="table-metric">Issues</th>
+                <th class="table-metric">Contributors</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for name, summary in report.activity.repositories.items()
+                   | sort(attribute="0") %}
+                <tr data-repo-row data-repo="{{ name }}">
+                  <td>
+                    <span class="mono">{{ name }}</span>
+                    {% if summary.commits > 0 %}
+                      <span class="tag tag-success">active</span>
+                    {% else %}
+                      <span class="tag tag-muted">no activity</span>
+                    {% endif %}
+                  </td>
+                  <td class="table-metric">
+                    {{ summary.commits }}
+                  </td>
+                  <td class="table-metric">
+                    {{ summary.lines_added }}++
+                    /
+                    {{ summary.lines_deleted }}--
+                  </td>
+                  <td class="table-metric">
+                    {{ summary.pull_requests_opened }}
+                    <span class="summary-subvalue">
+                      (merged {{ summary.pull_requests_merged }})
+                    </span>
+                  </td>
+                  <td class="table-metric">
+                    {{ summary.issues_opened }}
+                    <span class="summary-subvalue">
+                      (closed {{ summary.issues_closed }})
+                    </span>
+                  </td>
+                  <td class="table-metric">
+                    {{ summary.contributors }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </section>
+
+        {# ---------------- Timeline ---------------- #}
+        <section id="timeline" class="section card">
+          <div class="section-header">
+            <h2>Activity timeline</h2>
+            <span>
+              Daily activity ·
+              <span class="pill">
+                <span style="width: 10px; height: 10px; border-radius: 999px; background: rgba(56, 189, 248, 0.9); display: inline-block;"></span>
+                commits
+              </span>
+              <span class="pill">
+                <span style="width: 10px; height: 10px; border-radius: 999px; background: rgba(34, 197, 94, 0.8); display: inline-block;"></span>
+                pull requests
+              </span>
+              <span class="pill">
+                <span style="width: 10px; height: 10px; border-radius: 999px; background: rgba(234, 179, 8, 0.9); display: inline-block;"></span>
+                issues
+              </span>
+            </span>
+          </div>
+          <div class="timeline-bars" id="timelineBars"></div>
+        </section>
+
+        {# ---------------- Pull requests ---------------- #}
+        <section id="pull-requests" class="section card">
+          <div class="section-header">
+            <h2>Pull requests</h2>
+            <span>
+              Most recent {{ report.pull_requests|length }}
+              in window
+            </span>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Repo</th>
+                <th>Author</th>
+                <th class="table-metric">State</th>
+                <th class="table-metric">Reviews</th>
+                <th class="table-metric">Changed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pr in report.pull_requests
+                   | sort(attribute="created_at", reverse=True) %}
+                <tr
+                  data-pr-row
+                  data-user="{{ pr.author_login or '' }}"
+                  data-repo="{{ pr.repository_full_name }}"
+                  data-text="{{ pr.title|lower }}"
+                  data-date="{{ pr.created_at.date().isoformat() }}"
+                  data-state="{% if pr.is_merged %}merged{% else %}{{ pr.state|lower }}{% endif %}"
+                >
+                  <td class="table-metric mono">
+                    {{ pr.number }}
+                  </td>
+                  <td>
+                    {{ pr.title }}
+                  </td>
+                  <td class="mono">
+                    {{ pr.repository_full_name }}
+                  </td>
+                  <td class="mono">
+                    {{ pr.author_login or "unknown" }}
+                  </td>
+                  <td class="table-metric">
+                    {% if pr.is_merged %}
+                      <span class="status-merged">merged</span>
+                    {% elif pr.state == "OPEN" %}
+                      <span class="status-open">open</span>
+                    {% else %}
+                      <span class="status-closed">{{ pr.state|lower }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="table-metric">
+                    {{ pr.review_count }}
+                    <span class="summary-subvalue">
+                      commenters: {{ pr.reviewer_logins|length }}
+                    </span>
+                  </td>
+                  <td class="table-metric">
+                    {{ pr.changed_files }}
+                    <span class="summary-subvalue">
+                      {{ pr.additions }}++ / {{ pr.deletions }}--
+                    </span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </section>
+
+        {# ---------------- Commits ---------------- #}
+        <section id="commits" class="section card">
+          <div class="section-header">
+            <h2>Commits</h2>
+            <span>
+              Showing {{ report.commits|length }} commits in window
+            </span>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>When</th>
+                <th>Repo</th>
+                <th>Author</th>
+                <th>Message</th>
+                <th class="table-metric">Lines</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for commit in report.commits
+                   | sort(attribute="committed_at", reverse=True) %}
+                <tr
+                  data-commit-row
+                  data-user="{{ commit.author_login or '' }}"
+                  data-repo="{{ commit.repository_full_name }}"
+                  data-text="{{ (commit.message_headline ~ ' ' ~ (commit.message_body or ''))|lower }}"
+                  data-date="{{ commit.committed_at.date().isoformat() }}"
+                  data-additions="{{ commit.additions }}"
+                  data-deletions="{{ commit.deletions }}"
+                >
+                  <td class="mono">
+                    {{ commit.committed_at.isoformat() }}
+                  </td>
+                  <td class="mono">
+                    {{ commit.repository_full_name }}
+                  </td>
+                  <td class="mono">
+                    {{ commit.author_login or commit.author_name or "unknown" }}
+                  </td>
+                  <td>
+                    {{ commit.message_headline }}
+                    {% if commit.message_body %}
+                      <div class="summary-subvalue">
+                        {{ commit.message_body }}
+                      </div>
+                    {% endif %}
+                  </td>
+                  <td class="table-metric">
+                    {{ commit.additions }}++
+                    /
+                    {{ commit.deletions }}--
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </section>
+
+        {# ---------------- Issues ---------------- #}
+        <section id="issues" class="section card">
+          <div class="section-header">
+            <h2>Issues</h2>
+            <span>
+              {{ report.issues|length }} in window
+            </span>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Repo</th>
+                <th>Author</th>
+                <th class="table-metric">State</th>
+                <th class="table-metric">Comments</th>
+                <th>Assignees</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for issue in report.issues
+                   | sort(attribute="created_at", reverse=True) %}
+                <tr
+                  data-issue-row
+                  data-user="{{ issue.author_login or '' }}"
+                  data-repo="{{ issue.repository_full_name }}"
+                  data-text="{{ issue.title|lower }}"
+                  data-date="{{ issue.created_at.date().isoformat() }}"
+                  data-state="{{ issue.state|lower }}"
+                >
+                  <td class="table-metric mono">
+                    {{ issue.number }}
+                  </td>
+                  <td>
+                    {{ issue.title }}
+                  </td>
+                  <td class="mono">
+                    {{ issue.repository_full_name }}
+                  </td>
+                  <td class="mono">
+                    {{ issue.author_login or "unknown" }}
+                  </td>
+                  <td class="table-metric">
+                    {% if issue.state == "OPEN" %}
+                      <span class="status-open">open</span>
+                    {% else %}
+                      <span class="status-closed">{{ issue.state|lower }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="table-metric">
+                    {{ issue.comment_count }}
+                  </td>
+                  <td>
+                    {% if issue.assignee_logins %}
+                      <span class="mono">
+                        {{ issue.assignee_logins | join(", ") }}
+                      </span>
+                    {% else %}
+                      <span class="summary-subvalue">unassigned</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </section>
+      </main>
+    </div>
+    <script>
+      (function () {
+        const userFilter = document.getElementById("userFilter");
+        const textFilter = document.getElementById("textFilter");
+        const timelineBars = document.getElementById("timelineBars");
+        const mainEl = document.querySelector("main");
+
+        if (!userFilter || !textFilter || !timelineBars || !mainEl) {
+          return;
+        }
+
+        const toLower = (value) => (value || "").toString().toLowerCase();
+
+        function applyFilters() {
+          const user = userFilter.value;
+          const text = toLower(textFilter.value);
+
+          const matchesUser = (rowUser) => !user || rowUser === user;
+          const matchesText = (textSource) =>
+            !text || toLower(textSource).includes(text);
+
+          const activeRepos = new Set();
+          const activeUsers = new Set();
+          let commitsCount = 0;
+          let commitsAdded = 0;
+          let commitsDeleted = 0;
+          let prsOpened = 0;
+          let prsMerged = 0;
+          let issuesOpened = 0;
+          let issuesClosed = 0;
+          const dailyCounts = new Map();
+
+          const bumpDaily = (type, row) => {
+            if (row.style.display === "none") {
+              return;
+            }
+            const date = row.getAttribute("data-date") || "";
+            if (!date) {
+              return;
+            }
+            const key = date;
+            const entry =
+              dailyCounts.get(key) || { commits: 0, prs: 0, issues: 0 };
+            entry[type] += 1;
+            dailyCounts.set(key, entry);
+          };
+
+          // Contributors
+          document
+            .querySelectorAll("[data-user-row]")
+            .forEach((row) => {
+              const rowUser = row.getAttribute("data-user") || "";
+              const visible = matchesUser(rowUser);
+              row.style.display = visible ? "" : "none";
+            });
+
+          // Pull requests
+          document
+            .querySelectorAll("[data-pr-row]")
+            .forEach((row) => {
+              const rowUser = row.getAttribute("data-user") || "";
+              const rowText = row.getAttribute("data-text") || "";
+              const rowRepo = row.getAttribute("data-repo") || "";
+              const visible = matchesUser(rowUser) && matchesText(rowText);
+              row.style.display = visible ? "" : "none";
+              if (visible && rowRepo) {
+                activeRepos.add(rowRepo);
+              }
+              if (visible && rowUser) {
+                activeUsers.add(rowUser);
+              }
+              if (visible) {
+                prsOpened += 1;
+                const state = (row.getAttribute("data-state") || "").toLowerCase();
+                if (state === "merged") {
+                  prsMerged += 1;
+                }
+              }
+              bumpDaily("prs", row);
+            });
+
+          // Commits
+          document
+            .querySelectorAll("[data-commit-row]")
+            .forEach((row) => {
+              const rowUser = row.getAttribute("data-user") || "";
+              const rowText = row.getAttribute("data-text") || "";
+              const rowRepo = row.getAttribute("data-repo") || "";
+              const visible = matchesUser(rowUser) && matchesText(rowText);
+              row.style.display = visible ? "" : "none";
+              if (visible && rowRepo) {
+                activeRepos.add(rowRepo);
+              }
+              if (visible && rowUser) {
+                activeUsers.add(rowUser);
+              }
+              if (visible) {
+                commitsCount += 1;
+                commitsAdded += Number(row.getAttribute("data-additions") || "0");
+                commitsDeleted += Number(row.getAttribute("data-deletions") || "0");
+              }
+              bumpDaily("commits", row);
+            });
+
+          // Issues (filter by author; could be extended to assignees)
+          document
+            .querySelectorAll("[data-issue-row]")
+            .forEach((row) => {
+              const rowUser = row.getAttribute("data-user") || "";
+              const rowText = row.getAttribute("data-text") || "";
+              const rowRepo = row.getAttribute("data-repo") || "";
+              const visible = matchesUser(rowUser) && matchesText(rowText);
+              row.style.display = visible ? "" : "none";
+              if (visible && rowRepo) {
+                activeRepos.add(rowRepo);
+              }
+              if (visible && rowUser) {
+                activeUsers.add(rowUser);
+              }
+              if (visible) {
+                issuesOpened += 1;
+                const state = (row.getAttribute("data-state") || "").toLowerCase();
+                if (state && state !== "open") {
+                  issuesClosed += 1;
+                }
+              }
+            });
+
+          // Repositories: align with selected contributor/text
+          document
+            .querySelectorAll("[data-repo-row]")
+            .forEach((row) => {
+              const repo = row.getAttribute("data-repo") || "";
+              const repoMatchesText = matchesText(repo);
+
+              let visible = true;
+              if (user) {
+                visible = activeRepos.has(repo);
+              }
+              if (text) {
+                visible = visible && (repoMatchesText || activeRepos.has(repo));
+              }
+
+              row.style.display = visible ? "" : "none";
+            });
+
+          // Update overview summary metrics for filtered view
+          const visibleRepoRows = Array.from(
+            document.querySelectorAll("[data-repo-row]"),
+          ).filter((row) => row.style.display !== "none");
+
+          const reposCountEl = document.getElementById("summaryReposCount");
+          const reposActiveEl = document.getElementById("summaryReposActive");
+          if (reposCountEl && reposActiveEl) {
+            const repoCount = visibleRepoRows.length;
+            reposCountEl.textContent = String(repoCount);
+            reposActiveEl.textContent = String(repoCount);
+          }
+
+          const commitsCountEl = document.getElementById("summaryCommitsCount");
+          const linesAddedEl = document.getElementById("summaryLinesAdded");
+          const linesDeletedEl = document.getElementById("summaryLinesDeleted");
+          if (commitsCountEl && linesAddedEl && linesDeletedEl) {
+            commitsCountEl.textContent = String(commitsCount);
+            linesAddedEl.textContent = String(commitsAdded);
+            linesDeletedEl.textContent = String(commitsDeleted);
+          }
+
+          const prsOpenedEl = document.getElementById("summaryPrsOpened");
+          const prsMergedEl = document.getElementById("summaryPrsMerged");
+          if (prsOpenedEl && prsMergedEl) {
+            prsOpenedEl.textContent = String(prsOpened);
+            prsMergedEl.textContent = String(prsMerged);
+          }
+
+          const issuesOpenedEl = document.getElementById("summaryIssuesOpened");
+          const issuesClosedEl = document.getElementById("summaryIssuesClosed");
+          if (issuesOpenedEl && issuesClosedEl) {
+            issuesOpenedEl.textContent = String(issuesOpened);
+            issuesClosedEl.textContent = String(issuesClosed);
+          }
+
+          const contribActiveEl = document.getElementById("summaryContribActive");
+          const contribInactiveEl =
+            document.getElementById("summaryContribInactive");
+          if (contribActiveEl && contribInactiveEl) {
+            const totalMembers = Number(
+              mainEl.getAttribute("data-total-members") || "0",
+            );
+            const activeCount = activeUsers.size || (user ? 1 : 0);
+            contribActiveEl.textContent = String(activeCount);
+            if (totalMembers > 0) {
+              const inactiveCount = Math.max(totalMembers - activeCount, 0);
+              contribInactiveEl.textContent = String(inactiveCount);
+            }
+          }
+
+          // Rebuild timeline from visible rows / dailyCounts
+          const dates = Array.from(dailyCounts.keys()).sort();
+          if (dates.length === 0) {
+            timelineBars.innerHTML =
+              '<div class="summary-subvalue">No activity for this view.</div>';
+          } else {
+            let maxTotal = 0;
+            dates.forEach((d) => {
+              const c = dailyCounts.get(d);
+              const total = c.commits + c.prs + c.issues;
+              if (total > maxTotal) {
+                maxTotal = total;
+              }
+            });
+
+            const rowsHtml = dates
+              .map((d) => {
+                const c = dailyCounts.get(d);
+                const total = c.commits + c.prs + c.issues;
+                if (!total) {
+                  return "";
+                }
+                const commitsWidth = (c.commits / total) * 100;
+                const prsWidth = (c.prs / total) * 100;
+                const issuesWidth = (c.issues / total) * 100;
+                return (
+                  '<div class="timeline-row">' +
+                  '<div class="timeline-label mono">' +
+                  d +
+                  "</div>" +
+                  '<div class="timeline-bar-track">' +
+                  (c.commits
+                    ? '<div class="timeline-bar-commits" style="width: ' +
+                      commitsWidth +
+                      '%;"></div>'
+                    : "") +
+                  (c.prs
+                    ? '<div class="timeline-bar-prs" style="left: ' +
+                      commitsWidth +
+                      "%; width: " +
+                      prsWidth +
+                      '%;"></div>'
+                    : "") +
+                  (c.issues
+                    ? '<div class="timeline-bar-issues" style="left: ' +
+                      (commitsWidth + prsWidth) +
+                      "%; width: " +
+                      issuesWidth +
+                      '%;"></div>'
+                    : "") +
+                  "</div>" +
+                  '<div class="timeline-count">' +
+                  total +
+                  "</div>" +
+                  "</div>"
+                );
+              })
+              .join("");
+            timelineBars.innerHTML = rowsHtml;
+          }
+        }
+
+        userFilter.addEventListener("change", applyFilters);
+        textFilter.addEventListener("input", applyFilters);
+
+        // Initial render
+        applyFilters();
+      })();
+    </script>
+  </body>
+</html>
+

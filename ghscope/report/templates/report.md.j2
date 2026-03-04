@@ -1,0 +1,104 @@
+{% set org_label = report.org if report.org else "" %}
+{% set user_label = report.user if report.user else "" %}
+# GitHub Activity Report {{ org_label }} {{ user_label }}
+
+Generated at: {{ report.generated_at.isoformat() }}
+Period: {{ report.since.date().isoformat() }} to {{ report.until.date().isoformat() }}
+
+## Summary
+
+- Organization: {{ report.org or "N/A" }}
+- User: {{ report.user or "N/A" }}
+- Repositories: {{ report.activity.repositories|length }}
+- Commits: {{
+    report.activity.repositories.values()
+      | map(attribute="commits")
+      | sum
+  }} (lines: {{
+    report.activity.repositories.values()
+      | map(attribute="lines_added")
+      | sum
+  }}++ / {{
+    report.activity.repositories.values()
+      | map(attribute="lines_deleted")
+      | sum
+  }}--)
+- Pull requests: opened {{
+    report.activity.repositories.values()
+      | map(attribute="pull_requests_opened")
+      | sum
+  }}, merged {{
+    report.activity.repositories.values()
+      | map(attribute="pull_requests_merged")
+      | sum
+  }}
+- Issues: opened {{
+    report.activity.repositories.values()
+      | map(attribute="issues_opened")
+      | sum
+  }}, closed {{
+    report.activity.repositories.values()
+      | map(attribute="issues_closed")
+      | sum
+  }}
+- Active contributors: {{ report.activity.active_contributors|length }} (inactive: {{ report.activity.inactive_contributors|length }})
+
+## Contributors
+
+{% for login, summary in report.activity.users.items() %}
+### @{{ login }}
+
+- Commits: {{ summary.commits }} ({{ summary.lines_added }}++ / {{ summary.lines_deleted }}--)
+- Pull requests: opened {{ summary.pull_requests_opened }}, merged {{ summary.pull_requests_merged }}
+- Issues: opened {{ summary.issues_opened }}, closed {{ summary.issues_closed }}, assigned {{ summary.issues_assigned }}
+- Reviews: given {{ summary.reviews_given }}, received {{ summary.reviews_received }}
+
+{% endfor %}
+
+## Repositories
+
+{% for name, summary in report.activity.repositories.items() %}
+### {{ name }}
+
+- Commits: {{ summary.commits }} ({{ summary.lines_added }}++ / {{ summary.lines_deleted }}--)
+- Pull requests: opened {{ summary.pull_requests_opened }}, merged {{ summary.pull_requests_merged }}
+- Issues: opened {{ summary.issues_opened }}, closed {{ summary.issues_closed }}
+- Contributors: {{ summary.contributors }}
+
+{% endfor %}
+
+## Activity timeline
+
+| Day | Commits | Pull requests | Issues |
+| --- | ------- | ------------- | ------ |
+{% for bucket in report.timelines.by_day %}
+| {{ bucket.day.isoformat() }} | {{ bucket.commits }} | {{ bucket.pull_requests }} | {{ bucket.issues }} |
+{% endfor %}
+
+## Pull requests
+
+| # | Repository | Author | State | Created | Merged | Title |
+| - | ---------- | ------ | ----- | ------- | ------ | ----- |
+{% for pr in report.pull_requests
+     | sort(attribute="created_at", reverse=True) %}
+| {{ pr.number }} | {{ pr.repository_full_name }} | {{ pr.author_login or "unknown" }} | {%- if pr.is_merged -%}merged{%- else -%}{{ pr.state|lower }}{%- endif -%} | {{ pr.created_at.date().isoformat() }} | {{ pr.merged_at.date().isoformat() if pr.merged_at else "" }} | {{ pr.title }} |
+{% endfor %}
+
+## Commits
+
+| When | Repository | Author | Message | Lines |
+| ---- | ---------- | ------ | ------- | ----- |
+{% for commit in report.commits
+     | sort(attribute="committed_at", reverse=True) %}
+| {{ commit.committed_at.isoformat() }} | {{ commit.repository_full_name }} | {{ commit.author_login or commit.author_name or "unknown" }} | {{ commit.message_headline }} | {{ commit.additions }}++ / {{ commit.deletions }}-- |
+{% endfor %}
+
+## Issues
+
+| # | Repository | Author | State | Created | Closed | Assignees | Title |
+| - | ---------- | ------ | ----- | ------- | ------ | --------- | ----- |
+{% for issue in report.issues
+     | sort(attribute="created_at", reverse=True) %}
+| {{ issue.number }} | {{ issue.repository_full_name }} | {{ issue.author_login or "unknown" }} | {{ issue.state|lower }} | {{ issue.created_at.date().isoformat() }} | {{ issue.closed_at.date().isoformat() if issue.closed_at else "" }} | {%- if issue.assignee_logins -%}{{ issue.assignee_logins | join(", ") }}{%- endif -%} | {{ issue.title }} |
+{% endfor %}
+
