@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Iterable, List, Optional, Tuple
+from typing import Any, Iterable, List, Optional, Tuple
 
 from ghscope.client.graphql import GitHubGraphQLClient
 from ghscope.models.pull_request import PullRequest
@@ -76,9 +76,6 @@ def collect_repository_pull_requests(
         until.isoformat(),
     )
 
-    since_str = since.isoformat()
-    until_str = until.isoformat()
-
     pull_requests: List[PullRequest] = []
     after: Optional[str] = None
 
@@ -120,7 +117,7 @@ def _split_full_name(full_name: str) -> Tuple[str, str]:
 
 def _parse_pull_requests(
     repo_full_name: str,
-    nodes: Iterable[dict],
+    nodes: Iterable[dict[str, Any]],
     since: datetime,
     until: datetime,
 ) -> List[PullRequest]:
@@ -170,5 +167,3 @@ def _parse_pull_requests(
             ),
         )
     return parsed
-
-

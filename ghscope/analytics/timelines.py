@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass
 from datetime import date
-from typing import Iterable, List, Mapping
+from typing import Iterable, List
 
 from ghscope.models import Commit, Issue, PullRequest
 
@@ -26,9 +26,9 @@ def build_timelines(
     pull_requests: Iterable[PullRequest],
     issues: Iterable[Issue],
 ) -> Timelines:
-    commit_counts: Mapping[date, int] = Counter()
-    pr_counts: Mapping[date, int] = Counter()
-    issue_counts: Mapping[date, int] = Counter()
+    commit_counts: dict[date, int] = Counter()
+    pr_counts: dict[date, int] = Counter()
+    issue_counts: dict[date, int] = Counter()
 
     for commit in commits:
         commit_date = commit.committed_at.date()
@@ -58,4 +58,3 @@ def build_timelines(
         )
 
     return Timelines(by_day=buckets)
-

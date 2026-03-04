@@ -36,4 +36,3 @@ def resolve_token(config: TokenConfig) -> str:
         "GitHub token not provided. Set one of "
         f"{', '.join(config.env_vars)} or pass an explicit token.",
     )
-

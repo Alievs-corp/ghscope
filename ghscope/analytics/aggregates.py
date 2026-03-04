@@ -183,4 +183,3 @@ def aggregate_activity(
         active_contributors=active_contributors,
         inactive_contributors=inactive_contributors,
     )
-

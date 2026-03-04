@@ -33,4 +33,3 @@ def export_markdown(
     if output_path is not None:
         output_path.write_text(markdown, encoding="utf-8")
     return markdown
-

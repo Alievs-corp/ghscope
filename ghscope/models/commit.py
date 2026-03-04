@@ -17,4 +17,3 @@ class Commit(BaseModel):
     repository_full_name: str
     additions: int
     deletions: int
-

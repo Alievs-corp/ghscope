@@ -17,4 +17,3 @@ class Issue(BaseModel):
     assignee_logins: List[str]
     repository_full_name: str
     comment_count: int
-

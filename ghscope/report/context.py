@@ -38,4 +38,3 @@ class ReportContext:
     issues: list[Issue]
     generated_at: datetime
     templates_dir: Path
-

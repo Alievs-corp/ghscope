@@ -222,4 +222,3 @@ class ReportBuilder:
             export_csv(context, target_path)
         else:
             raise ValueError(f"Unsupported format: {format_name!r}")
-

@@ -47,4 +47,3 @@ def export_csv(context: ReportContext, output_path: Optional[Path]) -> str:
     if output_path is not None:
         output_path.write_text(text, encoding="utf-8")
     return text
-

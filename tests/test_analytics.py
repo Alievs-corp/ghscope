@@ -165,4 +165,3 @@ def test_build_timelines_basic() -> None:
     assert bucket.commits == 1
     assert bucket.pull_requests == 1
     assert bucket.issues == 1
-
