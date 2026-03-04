@@ -37,4 +37,3 @@ def compute_analytics(
         issues=issues,
     )
     return AnalyticsResult(activity=activity, timelines=timelines)
-

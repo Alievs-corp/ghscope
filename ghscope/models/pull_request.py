@@ -23,5 +23,3 @@ class PullRequest(BaseModel):
     review_count: int
     comment_count: int
     reviewer_logins: List[str]
-
-

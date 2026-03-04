@@ -7,4 +7,3 @@ from .pull_request import PullRequest
 from .issue import Issue
 
 __all__ = ["User", "Repository", "Commit", "PullRequest", "Issue"]
-

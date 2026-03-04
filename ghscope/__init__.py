@@ -8,4 +8,3 @@ try:
     __version__ = version("ghscope")
 except PackageNotFoundError:
     __version__ = "0.0.0"
-

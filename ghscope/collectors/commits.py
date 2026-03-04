@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Iterable, List, Optional, Tuple
+from typing import Any, Iterable, List, Optional, Tuple
 
 from ghscope.client.graphql import GitHubGraphQLClient
 from ghscope.models.commit import Commit
@@ -117,7 +117,7 @@ def _split_full_name(full_name: str) -> Tuple[str, str]:
     return owner, name
 
 
-def _parse_commits(repo_full_name: str, nodes: Iterable[dict]) -> List[Commit]:
+def _parse_commits(repo_full_name: str, nodes: Iterable[dict[str, Any]]) -> List[Commit]:
     parsed: List[Commit] = []
     for node in nodes:
         author = node.get("author") or {}
@@ -138,4 +138,3 @@ def _parse_commits(repo_full_name: str, nodes: Iterable[dict]) -> List[Commit]:
             ),
         )
     return parsed
-

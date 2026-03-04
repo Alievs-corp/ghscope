@@ -91,4 +91,3 @@ def test_issue_model() -> None:
         comment_count=0,
     )
     assert issue.state == "OPEN"
-

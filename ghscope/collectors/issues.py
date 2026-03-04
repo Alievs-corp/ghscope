@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import datetime
-from typing import Iterable, List, Optional, Tuple
+from typing import Any, Iterable, List, Optional, Tuple
 
 from ghscope.client.graphql import GitHubGraphQLClient
 from ghscope.models.issue import Issue
@@ -108,7 +108,7 @@ def _split_full_name(full_name: str) -> Tuple[str, str]:
 
 def _parse_issues(
     repo_full_name: str,
-    nodes: Iterable[dict],
+    nodes: Iterable[dict[str, Any]],
     since: datetime,
     until: datetime,
 ) -> List[Issue]:
@@ -141,4 +141,3 @@ def _parse_issues(
             ),
         )
     return parsed
-

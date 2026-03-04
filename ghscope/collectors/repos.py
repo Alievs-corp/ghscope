@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Iterable, List
+from typing import Any, Iterable, List
 
 from ghscope.client.graphql import GitHubGraphQLClient
 from ghscope.models.repo import Repository
@@ -131,7 +131,7 @@ def collect_user_repositories(client: GitHubGraphQLClient, login: str) -> List[R
     return repos
 
 
-def _parse_repositories(nodes: Iterable[dict]) -> List[Repository]:
+def _parse_repositories(nodes: Iterable[dict[str, Any]]) -> List[Repository]:
     parsed: List[Repository] = []
     for node in nodes:
         parsed.append(
@@ -151,4 +151,3 @@ def _parse_repositories(nodes: Iterable[dict]) -> List[Repository]:
             ),
         )
     return parsed
-

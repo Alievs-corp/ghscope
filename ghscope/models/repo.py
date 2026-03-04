@@ -16,4 +16,3 @@ class Repository(BaseModel):
     default_branch: str | None
     created_at: datetime
     updated_at: datetime
-

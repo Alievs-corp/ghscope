@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --extra dev --frozen
+
+      - name: Install project
+        run: uv pip install -e .
+
+      - name: Check formatting with Ruff
+        run: uv run ruff format --check .
+
+      - name: Run Ruff lint
+        run: uv run ruff check .
+
+      - name: Run mypy
+        run: uv run mypy ghscope
+
+      - name: Run tests
+        run: uv run pytest tests/ -v

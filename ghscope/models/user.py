@@ -14,4 +14,3 @@ class User(BaseModel):
     created_at: datetime
     is_site_admin: bool = False
     is_bot: bool = False
-

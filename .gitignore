@@ -6,6 +6,18 @@ dist/
 wheels/
 *.egg-info
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.vscode/
+.DS_Store
+.cursor/
+.idea/
+.env
+report.md
+report.html
+report.pdf
+report.json
+report.csv
 
 # Virtual environments
 .venv

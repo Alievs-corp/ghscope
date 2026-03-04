@@ -1,0 +1,74 @@
+name: Publish ghscope to PyPI
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    name: Build and publish to PyPI
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Extract version from tag
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE}" != "tag" ]]; then
+            echo "This workflow must be triggered by a tag." >&2
+            exit 1
+          fi
+
+          TAG_NAME="${GITHUB_REF_NAME}"
+          VERSION="${TAG_NAME#v}"
+
+          echo "Tag name: ${TAG_NAME}"
+          echo "Package version: ${VERSION}"
+
+          echo "PACKAGE_VERSION=${VERSION}" >> "$GITHUB_ENV"
+
+      - name: Update pyproject.toml version
+        run: |
+          python - << 'PY'
+          import os
+          import pathlib
+          import re
+
+          version = os.environ["PACKAGE_VERSION"]
+          path = pathlib.Path("pyproject.toml")
+          text = path.read_text(encoding="utf-8")
+
+          new_text, count = re.subn(
+              r'(?m)^(version\\s*=\\s*")[^"]*(")',
+              rf'\\1{version}\\2',
+              text,
+          )
+
+          if count == 0:
+              raise SystemExit("version field not found in pyproject.toml")
+
+          path.write_text(new_text, encoding="utf-8")
+          PY
+
+      - name: Install build tooling
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+
+      - name: Build distributions
+        run: python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

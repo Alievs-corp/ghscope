@@ -10,4 +10,3 @@ def test_cli_help() -> None:
     result = runner.invoke(cli, ["--help"])
     assert result.exit_code == 0
     assert "ghscope" in result.output
-
