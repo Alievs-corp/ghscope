@@ -48,9 +48,7 @@ class ReportBuilder:
             until_dt = until_dt.replace(tzinfo=timezone.utc)
 
         # Include the entire end date: set until to end of day (GitHub uses inclusive range)
-        until_dt = until_dt.replace(
-            hour=23, minute=59, second=59, microsecond=999999
-        )
+        until_dt = until_dt.replace(hour=23, minute=59, second=59, microsecond=999999)
         return since_dt, until_dt
 
     def _templates_dir(self) -> Path:
