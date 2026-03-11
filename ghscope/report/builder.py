@@ -49,15 +49,9 @@ class ReportBuilder:
 
         # Include the entire end date for date-only inputs (GitHub uses inclusive range).
         # If the user supplied an explicit time, respect it.
-        is_date_only_until = (
-            len(self.until) == 10
-            and self.until[4] == "-"
-            and self.until[7] == "-"
-        )
+        is_date_only_until = len(self.until) == 10 and self.until[4] == "-" and self.until[7] == "-"
         if is_date_only_until:
-            until_dt = until_dt.replace(
-                hour=23, minute=59, second=59, microsecond=999999
-            )
+            until_dt = until_dt.replace(hour=23, minute=59, second=59, microsecond=999999)
         return since_dt, until_dt
 
     def _templates_dir(self) -> Path:
