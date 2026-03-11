@@ -59,8 +59,6 @@ def collect_repository_issues(
     until: datetime,
 ) -> List[Issue]:
     """Collect issues for a repository over a time range."""
-    if "/" not in repo_full_name:
-        raise ValueError(f"Repository full name must be 'owner/name', got: {repo_full_name!r}")
     owner, name = _split_full_name(repo_full_name)
     logger.info(
         "Collecting issues for %s between %s and %s",
@@ -104,7 +102,18 @@ def collect_repository_issues(
 
 
 def _split_full_name(full_name: str) -> Tuple[str, str]:
+    # Must be exactly "owner/name" with non-empty parts.
+    if full_name.count("/") != 1:
+        raise ValueError(
+            f"Repository full name must be 'owner/name', got: {full_name!r}",
+        )
     owner, name = full_name.split("/", 1)
+    owner = owner.strip()
+    name = name.strip()
+    if not owner or not name:
+        raise ValueError(
+            f"Repository full name must be 'owner/name' with non-empty owner and name, got: {full_name!r}",
+        )
     return owner, name
 
 
