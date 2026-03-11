@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Iterable, List, Optional, Tuple
+from typing import Iterable, Optional
 
 from ghscope.analytics.aggregates import (
     ActivityReport,
@@ -42,5 +42,5 @@ class ReportContext:
     issues: list[Issue]
     generated_at: datetime
     templates_dir: Path
-    sorted_contributors: List[Tuple[str, UserActivitySummary]]
-    sorted_repositories: List[Tuple[str, RepositoryActivitySummary]]
+    sorted_contributors: list[tuple[str, UserActivitySummary]]
+    sorted_repositories: list[tuple[str, RepositoryActivitySummary]]
