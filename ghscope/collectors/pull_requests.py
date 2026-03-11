@@ -68,6 +68,8 @@ def collect_repository_pull_requests(
     until: datetime,
 ) -> List[PullRequest]:
     """Collect pull requests for a repository over a time range."""
+    if "/" not in repo_full_name:
+        raise ValueError(f"Repository full name must be 'owner/name', got: {repo_full_name!r}")
     owner, name = _split_full_name(repo_full_name)
     logger.info(
         "Collecting pull requests for %s between %s and %s",

@@ -59,6 +59,8 @@ def collect_repository_issues(
     until: datetime,
 ) -> List[Issue]:
     """Collect issues for a repository over a time range."""
+    if "/" not in repo_full_name:
+        raise ValueError(f"Repository full name must be 'owner/name', got: {repo_full_name!r}")
     owner, name = _split_full_name(repo_full_name)
     logger.info(
         "Collecting issues for %s between %s and %s",
@@ -135,7 +137,11 @@ def _parse_issues(
                     else None
                 ),
                 author_login=author.get("login"),
-                assignee_logins=[assignee["login"] for assignee in assignees_nodes],
+                assignee_logins=[
+                    login
+                    for assignee in assignees_nodes
+                    if (login := assignee.get("login")) is not None
+                ],
                 repository_full_name=repo_full_name,
                 comment_count=int(comments.get("totalCount", 0)),
             ),

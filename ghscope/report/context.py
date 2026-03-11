@@ -3,9 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Iterable, List, Optional, Tuple
 
-from ghscope.analytics.aggregates import ActivityReport
+from ghscope.analytics.aggregates import (
+    ActivityReport,
+    RepositoryActivitySummary,
+    UserActivitySummary,
+)
 from ghscope.analytics.timelines import Timelines
 from ghscope.models import Commit, Issue, PullRequest, Repository, User
 
@@ -38,3 +42,5 @@ class ReportContext:
     issues: list[Issue]
     generated_at: datetime
     templates_dir: Path
+    sorted_contributors: List[Tuple[str, UserActivitySummary]]
+    sorted_repositories: List[Tuple[str, RepositoryActivitySummary]]

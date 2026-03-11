@@ -47,6 +47,8 @@ class ReportBuilder:
         if until_dt.tzinfo is None:
             until_dt = until_dt.replace(tzinfo=timezone.utc)
 
+        # Include the entire end date: set until to end of day (GitHub uses inclusive range)
+        until_dt = until_dt.replace(hour=23, minute=59, second=59, microsecond=999999)
         return since_dt, until_dt
 
     def _templates_dir(self) -> Path:
@@ -150,20 +152,29 @@ class ReportBuilder:
         pull_requests: Iterable[PullRequest],
         issues: Iterable[Issue],
     ) -> ReportContext:
+        activity = analytics.activity
+        sorted_contributors = sorted(
+            activity.users.items(),
+            key=lambda item: item[1].commits,
+            reverse=True,
+        )
+        sorted_repositories = sorted(activity.repositories.items(), key=lambda item: item[0])
         return ReportContext(
             org=self.org,
             user=self.user,
             since=since,
             until=until,
-            activity=analytics.activity,
+            activity=activity,
             timelines=analytics.timelines,
             users=list(users),
             repositories=list(repos),
             commits=list(commits),
             pull_requests=list(pull_requests),
             issues=list(issues),
-            generated_at=datetime.utcnow(),
+            generated_at=datetime.now(timezone.utc),
             templates_dir=self._templates_dir(),
+            sorted_contributors=sorted_contributors,
+            sorted_repositories=sorted_repositories,
         )
 
     def build_and_export(

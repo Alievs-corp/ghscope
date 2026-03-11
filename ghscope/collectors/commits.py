@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Iterable, List, Optional, Tuple
 
 from ghscope.client.graphql import GitHubGraphQLClient
@@ -60,6 +60,8 @@ def collect_repository_commits(
     until: datetime,
 ) -> List[Commit]:
     """Collect commits for a repository over a time range."""
+    if "/" not in repo_full_name:
+        raise ValueError(f"Repository full name must be 'owner/name', got: {repo_full_name!r}")
     owner, name = _split_full_name(repo_full_name)
     logger.info(
         "Collecting commits for %s between %s and %s",
@@ -122,14 +124,16 @@ def _parse_commits(repo_full_name: str, nodes: Iterable[dict[str, Any]]) -> List
     for node in nodes:
         author = node.get("author") or {}
         author_user = author.get("user") or {}
+        authored_at = _parse_iso_date(node["authoredDate"])
+        committed_at = _parse_iso_date(node["committedDate"])
         parsed.append(
             Commit(
                 id=node["id"],
                 oid=node["oid"],
                 message_headline=node.get("messageHeadline", ""),
                 message_body=node.get("messageBody"),
-                authored_at=node["authoredDate"],
-                committed_at=node["committedDate"],
+                authored_at=authored_at,
+                committed_at=committed_at,
                 author_login=author_user.get("login"),
                 author_name=author.get("name"),
                 repository_full_name=repo_full_name,
@@ -138,3 +142,12 @@ def _parse_commits(repo_full_name: str, nodes: Iterable[dict[str, Any]]) -> List
             ),
         )
     return parsed
+
+
+def _parse_iso_date(value: str) -> datetime:
+    """Parse ISO 8601 date string from GraphQL (e.g. with Z suffix) to timezone-aware datetime."""
+    normalized = value.replace("Z", "+00:00")
+    dt = datetime.fromisoformat(normalized)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt

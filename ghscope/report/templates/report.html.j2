@@ -1,23 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="system">
   <head>
     <meta charset="utf-8" />
+    <meta name="color-scheme" content="light dark" />
     <title>GitHub Activity Report</title>
     <style>
+      /* Dark theme (Obsidian Depth) – fallback and explicit dark */
       :root {
         color-scheme: dark;
-        --bg: #020617;
-        --bg-elevated: #0b1220;
-        --bg-subtle: #020617;
-        --border-subtle: #1f2937;
-        --accent: #38bdf8;
-        --accent-soft: rgba(56, 189, 248, 0.1);
-        --accent-strong: #0ea5e9;
-        --text: #e5e7eb;
-        --muted: #9ca3af;
-        --danger: #f97373;
-        --success: #22c55e;
-        --warning: #facc15;
+        --bg: #0f0f0f;
+        --bg-elevated: #1a1a1a;
+        --bg-subtle: #0f0f0f;
+        --border-subtle: #2a2a2a;
+        --primary: #00d4aa;
+        --primary-soft: rgba(0, 212, 170, 0.12);
+        --secondary: #00a3cc;
+        --accent: #ff6b9d;
+        --text: #f5f5f5;
+        --muted: #a3a3a3;
+        --danger: #cf6679;
+        --success: #00d4aa;
+        --warning: #d4a574;
+        --tr-hover: rgba(255, 255, 255, 0.04);
+      }
+
+      /* System preference: light (Pearl Minimal) */
+      @media (prefers-color-scheme: light) {
+        html[data-theme="system"] {
+          color-scheme: light;
+          --bg: #f8f9fa;
+          --bg-elevated: #ffffff;
+          --bg-subtle: #f8f9fa;
+          --border-subtle: #dee2e6;
+          --primary: #0066cc;
+          --primary-soft: rgba(0, 102, 204, 0.1);
+          --secondary: #6610f2;
+          --accent: #ff6b35;
+          --text: #212529;
+          --muted: #6c757d;
+          --danger: #dc3545;
+          --success: #198754;
+          --warning: #fd7e14;
+          --tr-hover: rgba(0, 0, 0, 0.04);
+        }
+      }
+
+      /* System preference: dark */
+      @media (prefers-color-scheme: dark) {
+        html[data-theme="system"] {
+          color-scheme: dark;
+        }
+      }
+
+      /* Explicit light theme */
+      html[data-theme="light"] {
+        color-scheme: light;
+        --bg: #f8f9fa;
+        --bg-elevated: #ffffff;
+        --bg-subtle: #f8f9fa;
+        --border-subtle: #dee2e6;
+        --primary: #0066cc;
+        --primary-soft: rgba(0, 102, 204, 0.1);
+        --secondary: #6610f2;
+        --accent: #ff6b35;
+        --text: #212529;
+        --muted: #6c757d;
+        --danger: #dc3545;
+        --success: #198754;
+        --warning: #fd7e14;
+        --tr-hover: rgba(0, 0, 0, 0.04);
+      }
+
+      /* Explicit dark theme */
+      html[data-theme="dark"] {
+        color-scheme: dark;
+        --bg: #0f0f0f;
+        --bg-elevated: #1a1a1a;
+        --bg-subtle: #0f0f0f;
+        --border-subtle: #2a2a2a;
+        --primary: #00d4aa;
+        --primary-soft: rgba(0, 212, 170, 0.12);
+        --secondary: #00a3cc;
+        --accent: #ff6b9d;
+        --text: #f5f5f5;
+        --muted: #a3a3a3;
+        --danger: #cf6679;
+        --success: #00d4aa;
+        --warning: #d4a574;
+        --tr-hover: rgba(255, 255, 255, 0.04);
       }
 
       * {
@@ -26,13 +96,13 @@
 
       body {
         margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        background: radial-gradient(circle at top left, #0f172a, #020617 45%, #000 100%);
+        font-family: system-ui, -apple-system, sans-serif;
+        background: var(--bg);
         color: var(--text);
       }
 
       a {
-        color: var(--accent);
+        color: var(--primary);
         text-decoration: none;
       }
 
@@ -46,10 +116,10 @@
       }
 
       .sidebar {
-        width: 260px;
-        background: rgba(15, 23, 42, 0.98);
+        width: 248px;
+        background: var(--bg-elevated);
         border-right: 1px solid var(--border-subtle);
-        padding: 1.75rem 1.5rem;
+        padding: 1.25rem 1rem;
         position: fixed;
         top: 0;
         left: 0;
@@ -59,8 +129,8 @@
 
       .sidebar h1 {
         margin: 0 0 0.5rem;
-        font-size: 1.3rem;
-        letter-spacing: 0.02em;
+        font-size: 1.1rem;
+        font-weight: 600;
       }
 
       .sidebar .org {
@@ -84,14 +154,58 @@
 
       .sidebar-nav a {
         padding: 0.4rem 0.6rem;
-        border-radius: 0.4rem;
+        border-radius: 6px;
         color: var(--muted);
         display: block;
       }
 
       .sidebar-nav a:hover {
-        background: var(--accent-soft);
-        color: var(--accent-strong);
+        background: var(--primary-soft);
+        color: var(--primary);
+      }
+
+      .theme-toggle {
+        margin-bottom: 1.25rem;
+      }
+
+      .theme-toggle__label {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 0.35rem;
+      }
+
+      .theme-toggle__options {
+        display: flex;
+        border: 1px solid var(--border-subtle);
+        border-radius: 6px;
+        background: var(--bg-subtle);
+        overflow: hidden;
+      }
+
+      .theme-toggle__btn {
+        flex: 1;
+        border: none;
+        background: none;
+        color: var(--muted);
+        font-size: 0.8rem;
+        padding: 0.4rem 0.5rem;
+        cursor: pointer;
+        outline: none;
+        transition: color 0.12s ease, background-color 0.12s ease;
+      }
+
+      .theme-toggle__btn:hover {
+        color: var(--text);
+      }
+
+      .theme-toggle__btn:focus-visible {
+        color: var(--primary);
+      }
+
+      .theme-toggle__btn[aria-pressed="true"] {
+        background: var(--primary-soft);
+        color: var(--primary);
       }
 
       .sidebar-footer {
@@ -103,13 +217,14 @@
       main {
         flex: 1;
         max-width: 1200px;
-        padding: 1.75rem 2.0rem 2.5rem;
-        margin: 0 auto 0 260px;
+        padding: 1.5rem 1.5rem 2rem;
+        margin: 0 auto 0 248px;
       }
 
       .page-title {
-        font-size: 1.6rem;
-        margin: 0 0 0.5rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0 0 0.25rem;
       }
 
       .page-subtitle {
@@ -138,16 +253,15 @@
 
       .filter-group select,
       .filter-group input[type="search"] {
-        background: rgba(15, 23, 42, 0.96);
-        border-radius: 0.45rem;
-        border: 1px solid rgba(148, 163, 184, 0.5);
+        background: var(--bg-elevated);
+        border-radius: 6px;
+        border: 1px solid var(--border-subtle);
         color: var(--text);
         padding: 0.35rem 0.6rem;
         font-size: 0.8rem;
         min-width: 160px;
         outline: none;
-        transition: border-color 0.15s ease, box-shadow 0.15s ease,
-          background-color 0.15s ease;
+        transition: border-color 0.15s ease;
       }
 
       .filter-group input[type="search"]::placeholder {
@@ -156,9 +270,7 @@
 
       .filter-group select:focus,
       .filter-group input[type="search"]:focus {
-        border-color: var(--accent-strong);
-        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.6);
-        background-color: #020617;
+        border-color: var(--primary);
       }
 
       .filter-group select::-webkit-scrollbar {
@@ -166,16 +278,16 @@
       }
 
       .filter-group select::-webkit-scrollbar-track {
-        background: #020617;
+        background: var(--bg);
       }
 
       .filter-group select::-webkit-scrollbar-thumb {
-        background: #1f2937;
-        border-radius: 999px;
+        background: var(--border-subtle);
+        border-radius: 4px;
       }
 
       .filter-group select::-webkit-scrollbar-thumb:hover {
-        background: #374151;
+        background: var(--muted);
       }
 
       .grid {
@@ -185,11 +297,11 @@
       }
 
       .card {
-        background: rgba(15, 23, 42, 0.96);
-        border-radius: 0.8rem;
+        background: var(--bg-elevated);
+        border-radius: 8px;
         border: 1px solid var(--border-subtle);
         padding: 1rem 1.2rem;
-        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.6);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
 
       .card h2 {
@@ -212,7 +324,7 @@
 
       .summary-item {
         background: var(--bg-subtle);
-        border-radius: 0.7rem;
+        border-radius: 8px;
         padding: 0.6rem 0.75rem;
         border: 1px solid var(--border-subtle);
       }
@@ -238,18 +350,18 @@
         align-items: center;
         font-size: 0.7rem;
         padding: 0.1rem 0.4rem;
-        border-radius: 999px;
+        border-radius: 6px;
         border: 1px solid var(--border-subtle);
         color: var(--muted);
       }
 
       .tag-success {
-        border-color: rgba(34, 197, 94, 0.5);
+        border-color: var(--success);
         color: var(--success);
       }
 
       .tag-warning {
-        border-color: rgba(234, 179, 8, 0.5);
+        border-color: var(--warning);
         color: var(--warning);
       }
 
@@ -266,7 +378,7 @@
 
       .table th,
       .table td {
-        border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+        border-bottom: 1px solid var(--border-subtle);
         padding: 0.35rem 0.5rem;
         text-align: left;
         vertical-align: top;
@@ -275,14 +387,14 @@
       .table th {
         font-weight: 500;
         color: var(--muted);
-        background: rgba(15, 23, 42, 0.9);
+        background: var(--bg-elevated);
         position: sticky;
         top: 0;
         z-index: 1;
       }
 
-      .table tr:nth-child(even) td {
-        background: rgba(15, 23, 42, 0.5);
+      .table tbody tr:hover td {
+        background: var(--tr-hover);
       }
 
       .table-metric {
@@ -295,19 +407,29 @@
         align-items: center;
         gap: 0.25rem;
         padding: 0.1rem 0.45rem;
-        border-radius: 999px;
-        background: rgba(15, 23, 42, 0.9);
+        border-radius: 6px;
+        background: var(--bg-elevated);
         border: 1px solid var(--border-subtle);
         font-size: 0.7rem;
         color: var(--muted);
       }
+
+      .legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 4px;
+        display: inline-block;
+      }
+      .legend-commits { background: var(--primary); }
+      .legend-prs { background: var(--secondary); }
+      .legend-issues { background: var(--warning); }
 
       .status-merged {
         color: var(--success);
       }
 
       .status-open {
-        color: var(--accent-strong);
+        color: var(--primary);
       }
 
       .status-closed {
@@ -336,8 +458,8 @@
       .timeline-bar-track {
         position: relative;
         height: 0.5rem;
-        border-radius: 999px;
-        background: #020617;
+        border-radius: 6px;
+        background: var(--bg);
         overflow: hidden;
       }
 
@@ -351,15 +473,15 @@
       }
 
       .timeline-bar-commits {
-        background: rgba(56, 189, 248, 0.8);
+        background: var(--primary);
       }
 
       .timeline-bar-prs {
-        background: rgba(34, 197, 94, 0.7);
+        background: var(--secondary);
       }
 
       .timeline-bar-issues {
-        background: rgba(234, 179, 8, 0.8);
+        background: var(--warning);
       }
 
       .timeline-count {
@@ -400,10 +522,11 @@
           width: 100%;
           border-right: none;
           border-bottom: 1px solid var(--border-subtle);
+          padding: 1rem;
         }
 
         main {
-          padding: 1.25rem 1.25rem 2rem;
+          padding: 1.25rem 1rem 2rem;
           margin: 0;
         }
 
@@ -445,6 +568,14 @@
           Generated<br />
           <span class="mono">{{ report.generated_at.isoformat() }}</span>
         </div>
+        <div class="theme-toggle">
+          <span class="theme-toggle__label">Theme</span>
+          <div class="theme-toggle__options" role="group" aria-label="Color theme">
+            <button type="button" class="theme-toggle__btn" data-theme="system" aria-pressed="true">System</button>
+            <button type="button" class="theme-toggle__btn" data-theme="light" aria-pressed="false">Light</button>
+            <button type="button" class="theme-toggle__btn" data-theme="dark" aria-pressed="false">Dark</button>
+          </div>
+        </div>
         <nav class="sidebar-nav">
           <a href="#overview">Overview</a>
           <a href="#contributors">Contributors</a>
@@ -455,11 +586,8 @@
           <a href="#issues">Issues</a>
         </nav>
         <div class="sidebar-footer">
-          Using GitHub GraphQL (resource: <span class="mono">graphql</span>)<br />
-          This HTML is static &amp; portable.<br /><br />
-          <strong>Project links</strong><br />
-          <a href="https://github.com/Alievs-corp/ghscope">GitHub: Alievs-corp/ghscope</a><br />
-          <a href="https://pypi.org/project/ghscope/">PyPI: ghscope</a>
+          <a href="https://github.com/Alievs-corp/ghscope">GitHub</a> ·
+          <a href="https://pypi.org/project/ghscope/">PyPI</a>
         </div>
       </aside>
 
@@ -644,8 +772,7 @@
               </tr>
             </thead>
             <tbody>
-              {% for login, summary in report.activity.users.items()
-                   | sort(attribute="1.commits", reverse=True) %}
+              {% for login, summary in report.sorted_contributors %}
                 <tr data-user-row data-user="{{ login }}">
                   <td>
                     <span class="mono">@{{ login }}</span>
@@ -703,8 +830,7 @@
               </tr>
             </thead>
             <tbody>
-              {% for name, summary in report.activity.repositories.items()
-                   | sort(attribute="0") %}
+              {% for name, summary in report.sorted_repositories %}
                 <tr data-repo-row data-repo="{{ name }}">
                   <td>
                     <span class="mono">{{ name }}</span>
@@ -749,18 +875,9 @@
             <h2>Activity timeline</h2>
             <span>
               Daily activity ·
-              <span class="pill">
-                <span style="width: 10px; height: 10px; border-radius: 999px; background: rgba(56, 189, 248, 0.9); display: inline-block;"></span>
-                commits
-              </span>
-              <span class="pill">
-                <span style="width: 10px; height: 10px; border-radius: 999px; background: rgba(34, 197, 94, 0.8); display: inline-block;"></span>
-                pull requests
-              </span>
-              <span class="pill">
-                <span style="width: 10px; height: 10px; border-radius: 999px; background: rgba(234, 179, 8, 0.9); display: inline-block;"></span>
-                issues
-              </span>
+              <span class="pill"><span class="legend-dot legend-commits"></span> commits</span>
+              <span class="pill"><span class="legend-dot legend-prs"></span> pull requests</span>
+              <span class="pill"><span class="legend-dot legend-issues"></span> issues</span>
             </span>
           </div>
           <div class="timeline-bars" id="timelineBars"></div>
@@ -966,6 +1083,30 @@
     </div>
     <script>
       (function () {
+        var THEME_KEY = "ghscope-theme";
+        var htmlEl = document.documentElement;
+        var themeBtns = document.querySelectorAll(".theme-toggle__btn");
+
+        function setTheme(value) {
+          var theme = value || "system";
+          htmlEl.setAttribute("data-theme", theme);
+          try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+          themeBtns.forEach(function (btn) {
+            var isActive = (btn.getAttribute("data-theme") === theme);
+            btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+          });
+        }
+
+        (function initTheme() {
+          var saved;
+          try { saved = localStorage.getItem(THEME_KEY); } catch (e) { saved = null; }
+          setTheme(saved || "system");
+        })();
+
+        themeBtns.forEach(function (btn) {
+          btn.addEventListener("click", function () { setTheme(btn.getAttribute("data-theme")); });
+        });
+
         const userFilter = document.getElementById("userFilter");
         const textFilter = document.getElementById("textFilter");
         const timelineBars = document.getElementById("timelineBars");
@@ -1090,6 +1231,7 @@
                   issuesClosed += 1;
                 }
               }
+              bumpDaily("issues", row);
             });
 
           // Repositories: align with selected contributor/text
