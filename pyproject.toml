@@ -29,6 +29,13 @@ dev = [
 [project.scripts]
 ghscope = "ghscope.cli:main"
 
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = true
+
 [tool.mypy]
 python_version = "3.12"
 strict = true
